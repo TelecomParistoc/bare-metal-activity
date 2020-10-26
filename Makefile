@@ -9,14 +9,14 @@ OBJCOPY = $(CROSSCOMPILE)objcopy
 
 DIRS = src lib
 
-DEVICE = STM32030R8
+DEVICE = STM32F030R8
 
 GDB_SERVER = JLinkGDBServer
 ENDIAN = little
 
 ARCH = -mcpu=cortex-m0 -mthumb
 ASFLAGS = -g
-CPPFLAGS = -Iinclude/ -D$(DEVICE) -DSTM32F030x8
+CPPFLAGS = -Iinclude -D$(DEVICE) -DSTM32F030x8
 CFLAGS = -Wall -Wextra -g -O1 -std=gnu99 $(ARCH) $(INCLUDE)
 LDFLAGS = -T ld_ram.lds -nostdlib
 LDLIBS =
@@ -39,13 +39,13 @@ $(ELF): $(OBJS) ld_ram.lds
 -include $(DEPS)
 
 %.d: %.c
-	@$(CC) $(CFLAGS) -M -MF $@ -MP $< -MT $(@:%.d=%.o)
+	@$(CC) $(CPPFLAGS) $(CFLAGS) -M -MF $@ -MP $< -MT $(@:%.d=%.o)
 
 gdb_server:
 	$(GDB_SERVER) -device $(DEVICE) -endian $(ENDIAN) -if SWD -speed auto -ir -LocalhostOnly
 
 gdb:
-	$(GDB) $(ELF)
+	$(DB) $(ELF)
 
 clean:
 	$(RM) $(OBJS) $(DEPS) $(ELF)
