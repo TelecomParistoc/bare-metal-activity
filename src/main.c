@@ -1,6 +1,9 @@
+#include "../lib/irq.h"
 #include "stm32f0xx.h"
 
 int main() {
+    irq_init();
+
     SET_BIT(RCC->AHBENR, RCC_AHBENR_GPIOAEN | RCC_AHBENR_GPIOCEN);
 
     GPIOA->MODER =

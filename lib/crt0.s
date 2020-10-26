@@ -12,6 +12,9 @@ _start:
     @ zero bss out
     bl init_bss
 
+    @ copy data from flash to ram
+    bl copy_data
+
     @ call main
     bl main
 

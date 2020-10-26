@@ -6,23 +6,29 @@ MEMORY {
 ENTRY(_start)
 
 SECTIONS {
+    .vect_table :
+    {
+        _irq_table = . ;
+        lib/irq.o(*vectors*)
+    } >flash
+
     .text :
     {
         lib/crt0.o(.text)
         *(.text)
-    } >sram
+    } >flash
 
     .rodata :
     {
         *(.rodata*);
-    } >sram
+    } >flash
 
     .data :
     {
         _data = . ;
         *(.data);
         _edata = . ;
-    } >sram
+    } >sram AT>flash
 
     .bss :
     {
@@ -33,3 +39,6 @@ SECTIONS {
 }
 
 _stack = ORIGIN(sram) + LENGTH(sram);
+_data_lma = LOADADDR(.data);
+_data_lma_end = LOADADDR(.data) + SIZEOF(.data);
+_data_vma = ADDR(.data);
