@@ -103,6 +103,9 @@ Le premier objectif du TP est d'arriver à allumer une LED située sur le microc
 
 \newpage
 
+\section{Quelques points théoriques}
+%TODO
+
 \section{Prérequis}
 \subsection{\label{dependances}Dépendances}
 \begin{itemize}[label=$\bullet$]
@@ -289,12 +292,32 @@ Pour éviter les problèmes d'inclusions mutuelles de fichiers (un fichier \text
 \end{lstlisting}
 
 \subsubsection{Pointeur}
-On arrive enfin au cœur du sujet qui donne son nom de \textit{bas niveau} au langage C: les pointeurs et la gestion de la mémoire.
+On arrive enfin au cœur du sujet qui donne son nom de \textit{bas niveau} au langage C: les pointeurs et la gestion de la mémoire.\\
+
+Les pointeurs sont un type de variable particulier, il s'agit d'une adresse mémoire qui pointe sur une valeur.\\
+
+C'est plus compréhensible avec un exemple:
+
+\begin{lstlisting}[frame=single]
+int x = 42;
+int *y = &x; // cree un pointeur vers x
+int z = *y; // on dereference y, ce qui recupere la valeur de x
+\end{lstlisting}
+
+y est ici un pointeur vers un entier (ce qui est indiqué par l'étoile dans le type \textit{int *}), le déréférencement de y \textit{*y} récupère la valeur pointée, donc celle de x.\\
+
+Il faut faire attention: déréférencer un pointeur invalide (en particulier un pointeur nul) déclenche une erreur qui termine le programme.\\
+
+Les avantages des pointeurs sont
+\begin{itemize}
+\item la taille fixe (32 ou 64 bits sur les plate-formes récentes), cela permet de passer un pointeur à la place d'une grosse structure, ce qui évite de grosses copies de mémoire
+\item ils permettent de modifier des variables passées en argument, contournant ainsi la limite d'une seule valeur de retour
+\item c'est grâce aux pointeurs que l'on utilise le tas et des buffers de taille variable\footnote{c'est également possible dans la pile mais de manière plus limitée}: la fonction malloc de la bibliothèque standard renvoie un pointeur vers une zone de mémoire de la taille demandée
+\end{itemize}
 
 \subsubsection{Petite précision sur les chaînes de caractères}
 Les chaînes de caractères en C sont un peu particulières: une chaîne de caractères est un tableau de caractères qui termine par le caractère nul. Il faut faire attention de ne pas écrire après la limite du tableau (ce qui est techniquement tout à fait possible). Il faut également ne pas oublier le caractère nul à la fin sinon il est impossible de savoir quand arrêter de lire...
 
-\section{Quelques points théoriques}
 \section{\label{fichiers_fournis}Les fichiers fournis}
 \section{Le vif du sujet}
 
