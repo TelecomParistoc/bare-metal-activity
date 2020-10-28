@@ -29,6 +29,9 @@ DEPS = $(CSRCS:%.c=%.d)
 EXE = main
 ELF = $(EXE).elf
 IMG = $(EXE).bin
+STATEMENT = statement
+TP = tp
+TP_PATH = $(STATEMENT)/$(TP)
 
 $(IMG): $(ELF)
 	$(OBJCOPY) -O binary $< $@
@@ -48,11 +51,17 @@ gdb:
 	$(DB) $(ELF)
 
 clean:
-	$(RM) $(OBJS) $(DEPS) $(ELF)
+	$(RM) $(OBJS) $(DEPS)
+	$(RM) $(STATEMENT)/*.aux $(STATEMENT)/*.fdb_latexmk $(STATEMENT)/*.fls $(STATEMENT)/*.log $(STATEMENT)/*.out $(STATEMENT)/*.toc
 
 clean-all: clean
-	$(RM) $(IMG)
+	$(RM) $(ELF) $(IMG) $(TP_PATH).pdf
 
 re: clean-all $(IMG)
 
-.PHONY: gdb gdb_server clean re
+tp: $(TP_PATH).pdf
+
+$(TP_PATH).pdf: $(TP_PATH).tex
+	pdflatex -output-directory $(STATEMENT) $<
+
+.PHONY: gdb gdb_server clean clean-all re tp

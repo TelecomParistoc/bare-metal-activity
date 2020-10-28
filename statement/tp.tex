@@ -1,0 +1,114 @@
+\documentclass[a4paper,10pt]{article} %type de document et paramètres
+
+\usepackage{lmodern} %police de caractère
+\usepackage[english,french]{babel} %package de langues
+\usepackage[utf8]{inputenc} %package fondamental
+\usepackage[T1]{fontenc} %package fondamental
+
+\usepackage[top=3cm, bottom=3cm, left=3cm, right=3cm]{geometry} %permet de paramétrer les marges par défaut
+\usepackage{changepage} %permet de modifier localement une mise en page (marges,...) : utilisé pour la page de garde
+%\usepackage{multicol} %permet de mettre plusieurs colonnes (\begin{multicols}{2} \end{multicols} jusqu'à 10 colonnes)
+\usepackage[pdftex, pdfauthor={Pierre Gimalac}, pdftitle={Activité bare-metal}, colorlinks=false, linkcolor=black]{hyperref} %permet de se déplacer dans le pdf depuis le sommaire en cliquant sur les titres, ainsi que de parametrer les meta données du PDF
+\usepackage{url} %permet de mettre des URL actifs \url{}
+\let\urlorig\url
+\renewcommand{\url}[1]{\begin{otherlanguage}{english}\urlorig{#1}\end{otherlanguage}}
+
+%\usepackage{mathtools} %maths (à developper, utile par exemple pour enlever les espaces dus aux boites $\sum_{\mathclap{1\le i\le j\le n}} X_{ij}$)
+%\usepackage{amssymb} %maths
+%\usepackage{amsthm} %maths
+%\usepackage{amsmath} %maths
+%\usepackage{mathrsfs} %maths (par exemple les lettres caligraphiées)
+%\usepackage{stmaryrd} %maths (par exemple les ensembles d'entiers \rrbracket \llbracket)
+%\usepackage{calrsfs} %maths (par exemple les notations des ensembles)
+%\usepackage{yhmath} % permet de noter les arcs de cercle avec \wideparen{AOB}
+%\usepackage{xlop} %permet d'afficher des opérations mathématiques
+%\usepackage[squaren,Gray]{SIunits} %permet de noter des unités proprement
+%\usepackage{esdiff} %permet d'écrire la dérivée avec la notation de Leibniz \diff{v}{t}
+
+\usepackage{graphicx} %permet d'insérer des images proprement (ajoute des parametres)
+\usepackage{wrapfig} %permet de mettre des images à coté d'un texte
+%\usepackage{pdfpages} %permet d'insérer un pdf \includepdf[pages={1-2}]{truc.pdf}
+\usepackage{enumitem} %permet de changer le label d'une liste \begin{itemize}[label=$\cdot$]
+% \usepackage{ulem} %permet de souligner/barrer du texte
+%\usepackage{soul} %permet de souligner/barrer du texte
+% \usepackage{cancel} %permet de barrer du texte /cancel{text}
+
+
+%\usepackage{tikz} %package trooop bien permet de dessiner tout et n'importe quoi ! \begin{tikzpicture}
+%\usetikzlibrary{automata,positioning} % pour dessiner des automates
+%\usepackage{circuitikz} %permet de dessiner des circuits logiques (entre autre) avec la syntaxe de tikz (\begin{circuitikz}) par exemple \node[american not port] pour le 'non'
+%\usepackage{listings} %permet d'inserer du code dans le fichier (\lstset{language=Java} \begin{lstlisting} \end{lstlisting} )
+
+
+%\newcommand{\R}{\mathbb{R}}
+%\newcommand{\Rpe}{\mathbb{R}_{+}^{*}}
+%\newcommand{\Rb}{\overline{\mathbb{R}}}
+%\newcommand{\N}{\mathbb{N}}
+%\newcommand{\Z}{\mathbb{Z}}
+%\newcommand{\C}{\mathbb{C}}
+%\newcommand{\Q}{\mathbb{Q}}
+%\newcommand{\K}{\mathbb{K}}
+%\newcommand{\E}{\mathbb{E}} % espérance
+%\renewcommand{\P}{\mathbb{P}} % fonction de probabilité
+%\newcommand{\F}{\mathbb{F}}
+%\newcommand\abs[1]{\left|#1\right|}
+%\newcommand{\tq}{~|~}
+%\newcommand\fra[2]{\genfrac{}{}{0pt}{1}{#1}{#2}}
+%\newcommand\equi[1]{\renewcommand{\arraystretch}{0.3}~\begin{matrix}\sim\\#1\end{matrix}~\renewcommand{\arraystretch}{1}}
+%\newcommand{\dl}{développement limité }
+%\newcommand{\dls}{développements limités }
+%\newcommand{\ev}{espace vectoriel }
+%\newcommand{\evs}{espaces vectoriels }
+%\newcommand{\sev}{sous-espace vectoriel }
+%\newcommand{\sevs}{sous-espaces vectoriels }
+%\newcommand{\displayAmath}{\displaystyle}
+%\newcommand{\lime}[4]{#1\underset{\mathclap{#2 \rightarrow #3}}{\longrightarrow} #4}
+%\newcommand{\supp}{\mathrm{supp}~} % support
+%\newcommand{\Ima}{\mathrm{Im}~} % image
+%\newcommand{\Inv}{\mathrm{Inv}~} % nombre d'inversion d'une permutation
+%\newcommand{\ord}{\mathrm{ord}~} % ordre
+%\newcommand{\com}{\mathrm{com}~} % comatrice
+%\newcommand{\oversim}[1]{\overset{\sim}{#1}}
+%\newcommand{\legendre}[2]{\left(\frac{#1}{#2}\right)}
+%\newcommand{\Ber}{\mathrm{Ber}} % loi de Bernoulli
+
+
+
+
+\begin{document}
+
+\LARGE
+Activité bare-metal \hfill Télécom Robotics\\\\
+\small Adressez toute faute, demande de précision ou d'ajout à Pierre Gimalac [\href{mailto:pierre.gimalac@gmail.com}{pierre.gimalac@gmail.com}]\\
+ou directement sur le dépôt github [\href{https://github.com/TelecomParistoc/bare-metal-activity}{https://github.com/TelecomParistoc/bare-metal-activity}]
+
+\normalsize
+\renewcommand{\contentsname}{Sommaire}
+\thispagestyle{empty}
+\tableofcontents
+\thispagestyle{empty}
+
+\section{Introduction}
+L'objectif de cette activité est d'apprendre la programmation \textit{bare-metal}, c'est à dire sur microcontroleur, sans système d'exploitation pour nous faciliter la tâche.\\
+
+En particulier il n'y a presque aucune abstraction avec le matériel à part celles fournies par le processeur, c'est à nous de charger le programme en mémoire et de gérer les interruptions.\\
+
+De plus, il n'y a aucune fonction fournie et pas de gestion des processus donc tout doit se faire dans le même processus (dans un premier temps).\\
+
+Une grosse partie de la programmation sur microcontroleur est de lire la documentation pour connaître le fonctionnement précis de celui-ci. Ce TP vous indiquera quels documents et quelles pages doivent être regardées pour vous éviter de lire des centaines de pages comme le pauvre auteur.\\
+
+De plus, une architecture initiale est fournie pour éviter de passer trop de temps sans même arriver à exécuter un programme (voir \autoref{dependances} \nameref{dependances} et \autoref{fichiers_fournis} \nameref{fichiers_fournis}).\\
+
+L'objectif du TP est d'arriver à allumer une led située sur le microntroleur en appuyant sur l'un des boutons.
+
+\newpage
+
+\section{Prérequis}
+\subsection{\label{dependances}Dépendances}
+\subsection{Langage C}
+\section{Quelques points théoriques}
+\section{\label{fichiers_fournis}Les fichiers fournis}
+\section{Le vif du sujet}
+
+
+\end{document}
