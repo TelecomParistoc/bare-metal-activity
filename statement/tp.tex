@@ -7,7 +7,7 @@
 
 \usepackage[top=3cm, bottom=3cm, left=3cm, right=3cm]{geometry} %permet de paramétrer les marges par défaut
 \usepackage{changepage} %permet de modifier localement une mise en page (marges,...) : utilisé pour la page de garde
-%\usepackage{multicol} %permet de mettre plusieurs colonnes (\begin{multicols}{2} \end{multicols} jusqu'à 10 colonnes)
+\usepackage{multicol} %permet de mettre plusieurs colonnes (\begin{multicols}{2} \end{multicols} jusqu'à 10 colonnes)
 \usepackage[pdftex, pdfauthor={Pierre Gimalac}, pdftitle={Activité bare-metal}, colorlinks=false, linkcolor=black]{hyperref} %permet de se déplacer dans le pdf depuis le sommaire en cliquant sur les titres, ainsi que de parametrer les meta données du PDF
 \usepackage{url} %permet de mettre des URL actifs \url{}
 \let\urlorig\url
@@ -32,12 +32,12 @@
 % \usepackage{ulem} %permet de souligner/barrer du texte
 %\usepackage{soul} %permet de souligner/barrer du texte
 % \usepackage{cancel} %permet de barrer du texte /cancel{text}
-
+\usepackage{xcolor}
 
 %\usepackage{tikz} %package trooop bien permet de dessiner tout et n'importe quoi ! \begin{tikzpicture}
 %\usetikzlibrary{automata,positioning} % pour dessiner des automates
 %\usepackage{circuitikz} %permet de dessiner des circuits logiques (entre autre) avec la syntaxe de tikz (\begin{circuitikz}) par exemple \node[american not port] pour le 'non'
-%\usepackage{listings} %permet d'inserer du code dans le fichier (\lstset{language=Java} \begin{lstlisting} \end{lstlisting} )
+\usepackage{listings} %permet d'inserer du code dans le fichier (\lstset{language=Java} \begin{lstlisting} \end{lstlisting} )
 
 
 %\newcommand{\R}{\mathbb{R}}
@@ -99,13 +99,201 @@ Une grosse partie de la programmation sur microcontroleur est de lire la documen
 
 De plus, une architecture initiale est fournie pour éviter de passer trop de temps sans même arriver à exécuter un programme (voir \autoref{dependances} \nameref{dependances} et \autoref{fichiers_fournis} \nameref{fichiers_fournis}).\\
 
-L'objectif du TP est d'arriver à allumer une led située sur le microntroleur en appuyant sur l'un des boutons.
+Le premier objectif du TP est d'arriver à allumer une LED située sur le microcontroleur en appuyant sur l'un des boutons.
 
 \newpage
 
 \section{Prérequis}
 \subsection{\label{dependances}Dépendances}
+\begin{itemize}[label=$\bullet$]
+    \item make
+    \item toolchain arm-none-eabi
+    \begin{itemize}
+        \item sur ArchLinux:
+        \begin{enumerate}
+            \item arm-none-eabi-binutils
+            \item arm-none-eabi-gcc
+            \item arm-none-eabi-gdb
+            \item arm-none-eabi-newlib
+        \end{enumerate}
+        \item sur Debian:
+        \begin{enumerate}
+            \item binutils-arm-none-eabi
+            \item gcc-arm-none-eabi
+            \item gdb-arm-none-eabi
+            \item libnewlib-arm-none-eabi
+        \end{enumerate}
+    \end{itemize}
+    \item JLinkGDBServer:
+    \begin{itemize}
+        \item Sur ArchLinux: jlink (AUR)
+        \item Autre: débrouillez vous \href{https://www.segger.com/downloads/jlink/#J-LinkSoftwareAndDocumentationPack}{https://www.segger.com/downloads/jlink/}
+    \end{itemize}
+    \item latex (texlive) et pdflatex (pour compiler le sujet)
+\end{itemize}
+
+\subsection{Configuration}
+J'ai fait la configuration il y a plusieurs mois donc c'est compliqué de savoir quoi mettre ici.\\
+
+Si vous rencontrez des erreurs ou des comportements étranges, signalez-le.\\
+
+Pour pouvoir se connecter sur le microcontroleur sans être root il faut installer des règles udev, je crois qu'elles sont installées automatiquement sur ArchLinux mais je ne suis pas sûr de ce qui se passe avec d'autres OS.\\
+
+Pour que GDB lise le .gdbinit fourni, il faut faire quelque chose dont je ne me rappelle pas, mais qui sera affiché la première fois que vous essaierez de lancer GDB (signalez-le à ce moment là).\\
+
+Si vous êtes sur un autre Linux que Arch il faudra peut être modifier le Makefile pour donner le bon nom au exécutable.
+
 \subsection{Langage C}
+Si vous connaissez le langage C vous pouvez sauter cette section, il s'agit vraiment de points basiques pour que tout le monde puissent faire le TP.\\
+
+Le langage C est ce que l'on appelle un langage bas niveau (comparativement à la plupart des langages modernes\footnote{demandez à Pierre Gimalac de vous parler du langage Rust}), ce qui signifie qu'il offre peu d'abstraction par rapport à l'assembleur et en particulier par rapport à l'utilisation de la mémoire.\\
+
+\subsubsection{La syntaxe}
+En première approximation sa syntaxe est proche de celle de Java:
+
+\lstdefinestyle{customc}{
+  belowcaptionskip=1\baselineskip,
+  breaklines=true,
+  frame=L,
+  xleftmargin=\parindent,
+  language=C,
+  showstringspaces=false,
+  basicstyle=\footnotesize\ttfamily,
+  keywordstyle=\bfseries\color{green!40!black},
+  commentstyle=\itshape\color{purple!40!black},
+  identifierstyle=\color{blue},
+  stringstyle=\color{orange},
+}
+\newpage
+\lstset{language=C,style=customc}
+
+\begin{multicols}{2}
+\begin{lstlisting}[frame=single]
+// declaration de fonction
+int sum(int a, int b) {
+    return a + b;
+}
+\end{lstlisting}
+
+\begin{lstlisting}[frame=single]
+// boucle while
+while (condition) {
+    // do something
+}
+\end{lstlisting}
+
+\begin{lstlisting}[frame=single]
+// boucle for
+for (int i = 0; i < 10; i++) {
+    // do something
+}
+\end{lstlisting}
+
+\begin{lstlisting}[frame=single]
+// fonction main et appel de fonction
+int main(int argc, char *argv[]) {
+    return sum(-1, 1);
+}
+\end{lstlisting}
+
+\begin{lstlisting}[frame=single]
+// condition ternaire
+long x = (y == 0 ? 0 : 1);
+\end{lstlisting}
+
+\begin{lstlisting}[frame=single]
+// execution conditionnelle
+if (condition) {
+    // do something
+} else {
+    // do something else
+}
+\end{lstlisting}
+
+\begin{lstlisting}[frame=single]
+// declaration de tableau non initialise
+int tab[10];
+// declaration de tableau avec contenu explicite
+int tab2[] = { 1, 2, 3 };
+\end{lstlisting}
+
+\begin{lstlisting}[frame=single]
+// operations bit-a-bit
+// et bit-a-bit
+int x = a & b;
+// ou bit-a-bit
+int x = a | b;
+// xor bit-a-bit
+int x = a ^ b;
+// non bit-a-bit
+int x = ~a;
+\end{lstlisting}
+
+\end{multicols}
+
+\subsubsection{Les types}
+Les types primitifs en C sont\\
+
+Pour les entiers:\\
+- char, short, int, long, long long\\
+- on peut rajouter unsigned devant (unsigned int) pour la version non signée\\
+
+Pour les flottants:\\
+- float, double, long double\\
+
+Tous ces types ont des tailles différentes et variables selon les architectures.\\
+
+Pour éviter ce piège potentiel, des types supplémentaires sont définis dans \textit{stdint.h}, qui sont int8\_t, int16\_t, int32\_t et int64\_t, la version non signée s'obtient en rajoutant un \textit{u} devant le type (uint32\_t). Le nombre correspond à la taille du type en bit.\\
+
+\bigskip
+
+La partie délicate du C est en fait la partie qui diffère de Java. Il y a trois éléments sources de problèmes qui diffèrent de la syntaxe de Java.
+
+\subsubsection{Préprocesseur}
+Tout d'abord le préprocesseur, il s'agit d'un ensemble d'instructions qui seront exécutées à la compilation, et qui permettent de définir des valeurs et des fonctions, d'inclure des fichiers, ainsi que de faire des instructions conditionnelles.\\
+
+\begin{lstlisting}[frame=single]
+// on peut definir DEBUG depuis le fichier
+// ou a la compilation en donnant le parametre -DDEBUG a gcc
+#define DEBUG
+#include "file.h"
+#ifdef DEBUG
+    // en mode debug, LOG est une fonction qui affiche des messages sur la sortie erreur
+    #define LOG(txt) printf(stderr, "%s\n", txt)
+#else
+    // hors mode debug LOG n'est pas defini et les appels a LOG disparaissent
+    #define LOG(txt)
+#endif
+\end{lstlisting}
+
+La directive \textit{\#define} remplace directement les occurrences du texte par la valeur. Ainsi un \textit{\#define VALUE 42} remplacera toutes les occurrences de \textit{VALUE} par la valeur 42.
+
+\subsubsection{Gestion des fichiers multiples}
+La gestion des fichiers se fait avec le préprocesseur et la commande ``include''.\\
+
+Sans trop rentrer dans les détails sur le ``pourquoi'', pour chaque fichier \textit{.c} on définit un fichier \textit{.h} qui contient l'en-tête des fonctions que l'on veut exporter. On y met aussi les \textit{\#define} que l'on veut exporter, les structures et les directives préprocesseur \textit{\#include} qui sont nécessaires. On inclut ensuite le \textit{.h} dans le \textit{.c}, et tout se passe bien.\\
+
+Pour éviter les problèmes d'inclusions mutuelles de fichiers (un fichier \textit{a.h} qui inclue un fichier \textit{b.h} et vice-versa), on rajoute une sécurité dans les fichiers \textit{.h}:
+
+\begin{lstlisting}[frame=single]
+// on choisit un nom qui sera unique a l'echelle d'un projet
+// souvent on prend le nom du fichier auquel on rajoute un _H
+#ifndef FILE_NAME_H
+#define FILE_NAME_H
+
+// ...
+// contenu du fichier .h
+// ...
+
+#endif
+\end{lstlisting}
+
+\subsubsection{Pointeur}
+On arrive enfin au cœur du sujet qui donne son nom de \textit{bas niveau} au langage C: les pointeurs et la gestion de la mémoire.
+
+\subsubsection{Petite précision sur les chaînes de caractères}
+Les chaînes de caractères en C sont un peu particulières: une chaîne de caractères est un tableau de caractères qui termine par le caractère nul. Il faut faire attention de ne pas écrire après la limite du tableau (ce qui est techniquement tout à fait possible). Il faut également ne pas oublier le caractère nul à la fin sinon il est impossible de savoir quand arrêter de lire...
+
 \section{Quelques points théoriques}
 \section{\label{fichiers_fournis}Les fichiers fournis}
 \section{Le vif du sujet}
