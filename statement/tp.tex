@@ -38,7 +38,7 @@
 %\usetikzlibrary{automata,positioning} % pour dessiner des automates
 %\usepackage{circuitikz} %permet de dessiner des circuits logiques (entre autre) avec la syntaxe de tikz (\begin{circuitikz}) par exemple \node[american not port] pour le 'non'
 \usepackage{listings} %permet d'inserer du code dans le fichier (\lstset{language=Java} \begin{lstlisting} \end{lstlisting} )
-
+\usepackage{listingsutf8}
 
 %\newcommand{\R}{\mathbb{R}}
 %\newcommand{\Rpe}{\mathbb{R}_{+}^{*}}
@@ -72,8 +72,39 @@
 %\newcommand{\legendre}[2]{\left(\frac{#1}{#2}\right)}
 %\newcommand{\Ber}{\mathrm{Ber}} % loi de Bernoulli
 
+\lstdefinestyle{customc}{
+  belowcaptionskip=1\baselineskip,
+  breaklines=true,
+  frame=L,
+  xleftmargin=\parindent,
+  language=C,
+  showstringspaces=false,
+  basicstyle=\footnotesize\ttfamily,
+  keywordstyle=\bfseries\color{green!40!black},
+  commentstyle=\itshape\color{purple!40!black},
+  identifierstyle=\color{blue},
+  stringstyle=\color{orange},
+}
 
-
+\lstset{language=C,style=customc,extendedchars=true,inputencoding=utf8,literate=
+    {é}{{\'{e}}}1
+    {è}{{\`{e}}}1
+    {ê}{{\^{e}}}1
+    {ë}{{\¨{e}}}1
+    {û}{{\^{u}}}1
+    {ù}{{\`{u}}}1
+    {â}{{\^{a}}}1
+    {à}{{\`{a}}}1
+    {î}{{\^{i}}}1
+    {ô}{{\^{o}}}1
+    {ç}{{\c{c}}}1
+    {Ç}{{\c{C}}}1
+    {É}{{\'{E}}}1
+    {Ê}{{\^{E}}}1
+    {À}{{\`{A}}}1
+    {Â}{{\^{A}}}1
+    {Î}{{\^{I}}}1
+}
 
 \begin{document}
 
@@ -104,7 +135,44 @@ Le premier objectif du TP est d'arriver à allumer une LED située sur le microc
 \newpage
 
 \section{Quelques points théoriques}
-%TODO
+\subsection{La mémoire des processus}
+Chaque appareil dispose d'une quantité donnée de différents types de mémoire, en particulier des registres, de la mémoire vive (RAM) et de la mémoire morte (SSD, HDD).\\
+
+Les exécutables sont composés de différents espaces de mémoire: text, rodata, data, bss et stack.
+
+\begin{description}
+    \item[text:] le code qui sera exécuté, certaines constantes
+    \item[rodata:] les variables constantes (rodata = ``read-only data'')
+    \item[data:] les variables modifiables
+    \item[bss:] les variables initialisées à zéro (elles sont à part car cela fait gagner de la place)
+    \item[stack:] la pile, l'espace de mémoire dynamique qui sert à stocker les variables locales et les informations lors des appels de fonction
+\end{description}
+
+Ci-dessous un tableau indiquant où est stocké chaque type de variable en C (voir \autoref{rappels_c} \nameref{rappels_c} si besoin).
+
+\includegraphics[scale=0.35]{assets/memory.png}
+
+Le tas est un espace de mémoire dans lequel on peut allouer de la mémoire de taille variable et persistante (ne dépendant pas de l’exécution d'une fonction), il s'agit en fait d'une zone mémoire fournie par l'OS (sans trop rentrer dans les détails) donc que nous n'aborderons pas ici.
+
+\subsection{Les périphériques}
+Les périphériques sont ``mappés en mémoire'', c'est à dire qu'à chaque périphérique est associé un ensemble d'adresses virtuelles qui permettent de communiquer avec celui-ci.\\
+
+Les documentations du périphérique et du microcontroleur indiquent quelles adresses sont à regarder et comment la communication et la configuration s'effectuent.
+
+\subsection{General Purpose Input Output}
+Les General Purpose Input Output ou GPIO sont des moyens de communication génériques situés sur les microcontroleur. Leur avantage est d'être configurable de manière logicielle (et donc dynamique) en tant qu'entrée (un registre permet alors de lire la valeur), sortie (un registre permet alors d'écrire la valeur) ou même des fonctions alternatives spéciales.\\
+
+Dans le cas qui nous intéresse, chaque GPIO dispose de 16 broches pouvant individuellement être programmées. Chaque GPIO possède des adresses virtuelles qui permettent de configurer ses broches de manière très précise. Il est même possible de générer des interruptions depuis des périphériques branchés sur une broche d'un GPIO.\\
+
+La documentation indique les adresses de chacun des registres ainsi que la manière de les configurer.
+
+\subsection{Les registres ARM}
+Les processeurs ARM disposent de 16 registres\footnote{en vrai il y en a plus mais pas d'utilité courante},
+
+\subsection{Règle générale de configuration d'un microcontroleur}
+La règle qui suit est presque toujours vraie (il y a donc des cas où on ne l'appliquera pas mais c'est rare): il ne faut modifier que les bits qui nous intéressent dans un registre, et laisser leur valeur aux autres pour éviter de créer des problèmes.\\
+
+Pour voir comment modifier un bit particulier d'un registre, voir \autoref{bit_change} \nameref{bit_change}
 
 \section{Prérequis}
 \subsection{\label{dependances}Dépendances}
@@ -144,9 +212,9 @@ Pour pouvoir se connecter sur le microcontroleur sans être root il faut install
 
 Pour que GDB lise le .gdbinit fourni, il faut faire quelque chose dont je ne me rappelle pas, mais qui sera affiché la première fois que vous essaierez de lancer GDB (signalez-le à ce moment là).\\
 
-Si vous êtes sur un autre Linux que Arch il faudra peut être modifier le Makefile pour donner le bon nom au exécutable.
+Si vous êtes sur un autre Linux que Arch il faudra peut être modifier le Makefile pour donner le bon nom aux exécutables.
 
-\subsection{Langage C}
+\subsection{\label{rappels_c}Langage C}
 Si vous connaissez le langage C vous pouvez sauter cette section, il s'agit vraiment de points basiques pour que tout le monde puissent faire le TP.\\
 
 Le langage C est ce que l'on appelle un langage bas niveau (comparativement à la plupart des langages modernes\footnote{demandez à Pierre Gimalac de vous parler du langage Rust}), ce qui signifie qu'il offre peu d'abstraction par rapport à l'assembleur et en particulier par rapport à l'utilisation de la mémoire.\\
@@ -154,25 +222,9 @@ Le langage C est ce que l'on appelle un langage bas niveau (comparativement à l
 \subsubsection{La syntaxe}
 En première approximation sa syntaxe est proche de celle de Java:
 
-\lstdefinestyle{customc}{
-  belowcaptionskip=1\baselineskip,
-  breaklines=true,
-  frame=L,
-  xleftmargin=\parindent,
-  language=C,
-  showstringspaces=false,
-  basicstyle=\footnotesize\ttfamily,
-  keywordstyle=\bfseries\color{green!40!black},
-  commentstyle=\itshape\color{purple!40!black},
-  identifierstyle=\color{blue},
-  stringstyle=\color{orange},
-}
-\newpage
-\lstset{language=C,style=customc}
-
 \begin{multicols}{2}
 \begin{lstlisting}[frame=single]
-// declaration de fonction
+// déclaration de fonction
 int sum(int a, int b) {
     return a + b;
 }
@@ -205,7 +257,7 @@ long x = (y == 0 ? 0 : 1);
 \end{lstlisting}
 
 \begin{lstlisting}[frame=single]
-// execution conditionnelle
+// exécution conditionnelle
 if (condition) {
     // do something
 } else {
@@ -214,21 +266,21 @@ if (condition) {
 \end{lstlisting}
 
 \begin{lstlisting}[frame=single]
-// declaration de tableau non initialise
+// déclaration de tableau non initialise
 int tab[10];
-// declaration de tableau avec contenu explicite
+// déclaration de tableau avec contenu explicite
 int tab2[] = { 1, 2, 3 };
 \end{lstlisting}
 
 \begin{lstlisting}[frame=single]
-// operations bit-a-bit
-// et bit-a-bit
+// opérations bit-a-bit
+// et bit-à-bit
 int x = a & b;
-// ou bit-a-bit
+// ou bit-à-bit
 int x = a | b;
-// xor bit-a-bit
+// xor bit-à-bit
 int x = a ^ b;
-// non bit-a-bit
+// non bit-à-bit
 int x = ~a;
 \end{lstlisting}
 
@@ -246,7 +298,7 @@ Pour les flottants:\\
 
 Tous ces types ont des tailles différentes et variables selon les architectures.\\
 
-Pour éviter ce piège potentiel, des types supplémentaires sont définis dans \textit{stdint.h}, qui sont int8\_t, int16\_t, int32\_t et int64\_t, la version non signée s'obtient en rajoutant un \textit{u} devant le type (uint32\_t). Le nombre correspond à la taille du type en bit.\\
+Pour éviter ce piège potentiel, des types supplémentaires sont définis dans \textit{stdint.h}, qui sont int8\_t, int16\_t, int32\_t et int64\_t, la version non signée s'obtient en rajoutant un \textit{u} devant le type (uint32\_t). Le nombre correspond à la taille du type en bit. On utilisera ces types aussi souvent que possible, les seules exceptions sont le type char pour les chaînes de caractères et int qui correspond à la taille usuelle de calcul du processeur.\\
 
 \bigskip
 
@@ -255,16 +307,18 @@ La partie délicate du C est en fait la partie qui diffère de Java. Il y a troi
 \subsubsection{Préprocesseur}
 Tout d'abord le préprocesseur, il s'agit d'un ensemble d'instructions qui seront exécutées à la compilation, et qui permettent de définir des valeurs et des fonctions, d'inclure des fichiers, ainsi que de faire des instructions conditionnelles.\\
 
+Le préprocesseur remplace littéralement les occurrences des macros par leur définition.\\
+
 \begin{lstlisting}[frame=single]
-// on peut definir DEBUG depuis le fichier
-// ou a la compilation en donnant le parametre -DDEBUG a gcc
+// on peut définir DEBUG depuis le fichier
+// ou à la compilation en donnant le paramètre -DDEBUG à gcc
 #define DEBUG
 #include "file.h"
 #ifdef DEBUG
     // en mode debug, LOG est une fonction qui affiche des messages sur la sortie erreur
     #define LOG(txt) printf(stderr, "%s\n", txt)
 #else
-    // hors mode debug LOG n'est pas defini et les appels a LOG disparaissent
+    // hors mode debug LOG n'est pas défini et les appels a LOG disparaissent
     #define LOG(txt)
 #endif
 \end{lstlisting}
@@ -279,7 +333,7 @@ Sans trop rentrer dans les détails sur le ``pourquoi'', pour chaque fichier \te
 Pour éviter les problèmes d'inclusions mutuelles de fichiers (un fichier \textit{a.h} qui inclue un fichier \textit{b.h} et vice-versa), on rajoute une sécurité dans les fichiers \textit{.h}:
 
 \begin{lstlisting}[frame=single]
-// on choisit un nom qui sera unique a l'echelle d'un projet
+// on choisit un nom qui sera unique à l'échelle d'un projet
 // souvent on prend le nom du fichier auquel on rajoute un _H
 #ifndef FILE_NAME_H
 #define FILE_NAME_H
@@ -300,8 +354,8 @@ C'est plus compréhensible avec un exemple:
 
 \begin{lstlisting}[frame=single]
 int x = 42;
-int *y = &x; // cree un pointeur vers x
-int z = *y; // on dereference y, ce qui recupere la valeur de x
+int *y = &x; // crée un pointeur vers x
+int z = *y; // on déréférence y, ce qui récupère la valeur de x
 \end{lstlisting}
 
 y est ici un pointeur vers un entier (ce qui est indiqué par l'étoile dans le type \textit{int *}), le déréférencement de y \textit{*y} récupère la valeur pointée, donc celle de x.\\
@@ -315,8 +369,134 @@ Les avantages des pointeurs sont
 \item c'est grâce aux pointeurs que l'on utilise le tas et des buffers de taille variable\footnote{c'est également possible dans la pile mais de manière plus limitée}: la fonction malloc de la bibliothèque standard renvoie un pointeur vers une zone de mémoire de la taille demandée
 \end{itemize}
 
+\subsubsection{Volatile}
+Le mot-clé volatile indique qu'une variable peut changer de valeur ``spontanément'', c'est-à-dire sans que le programme ne touche à la variable.\\
+
+Le cas typique d'utilisation de ce mot-clé est pour les pointeurs sur des registres de périphériques.
+
+\begin{lstlisting}[frame=single]
+volatile uint32_t *reg = (volatile uint32_t *)0x40000800;
+// reg est un pointeur vers un registre de 32 bits
+// son adresse est 0x40000800
+\end{lstlisting}
+
+L'utilisation de volatile désactive certaines optimisations du compilateur, par exemple sans ce mot-clé deux lectures successives seraient transformées en une seule lecture. De même, pour deux écritures, ou pour des enchaînements de lectures et d'écritures.
+
 \subsubsection{Petite précision sur les chaînes de caractères}
 Les chaînes de caractères en C sont un peu particulières: une chaîne de caractères est un tableau de caractères qui termine par le caractère nul. Il faut faire attention de ne pas écrire après la limite du tableau (ce qui est techniquement tout à fait possible). Il faut également ne pas oublier le caractère nul à la fin sinon il est impossible de savoir quand arrêter de lire...
+
+\subsection{\label{bit_change}Algèbre de Boole et opérations bit-à-bit en C}
+Lorsque l'on paramètre un registre, on veut en général changer un bit (ou plusieurs) particulier et laisser les autres à leur valeur. Pour cela on doit utiliser des opérations bit-à-bit qui ne vont changer que ce que l'on veut changer.\\
+
+Les opérations bit-à-bit disponibles sont:
+
+\begin{tabular}{|c|c|c|l|}
+\hline
+nom & opérateur & nombre d'opérandes & description \\
+\hline
+et & \& & 2 & renvoie 1 si et seulement si les deux opérandes valent 1 \\
+\hline
+ou & | & 2 & renvoie 0 si et seulement si les deux opérandes valent 0 \\
+\hline
+xor & $\widehat{}$ & 2 & renvoie 1 si et seulement si une des deux opérandes vaut 1 \\
+\hline
+non & \texttildelow & 1 & renvoie 0 si l'opérande vaut 1 et inversement\\
+\hline
+left shift & $<<$ & 2 & décale les bits vers la gauche (indiqué par le 2e opérande) \\
+\hline
+right shift & $>>$ & 2 & décale les bits vers la droite (indiqué par le 2e opérande) \\
+\hline
+\end{tabular}
+
+\subsubsection{Mettre un bit à 1}
+Supposons que l'on ait une variable \textit{var} dont on veut mettre à 1 le 10e bit, sans toucher aux autres:
+
+\begin{lstlisting}[frame=single]
+// peu importe la valeur initiale de var
+// on doit conserver tous ses bits,
+// et mettre le 10e à 1
+uint32_t var = 123456789;
+
+var |= 1 << 10;
+// 1 << 10 == 0b00000000000000000000010000000000
+// on sait que 1 | 0 == 1 et 0 | 0 == 0 (le ou avec 0 conserve la valeur)
+// donc le seul bit qui peut être modifié est le 10e
+// il passe à 1, peu importe sa valeur initiale
+\end{lstlisting}
+
+\subsubsection{Mettre un bit à 0}
+Supposons que l'on ait une variable \textit{var} dont on veut mettre à 0 le 10e bit, sans toucher aux autres. Celui là est un peu plus complexe que le précédent.
+
+\begin{lstlisting}[frame=single]
+// peu importe la valeur initiale de var
+// on doit conserver tous ses bits,
+// et mettre le 10e à 0
+uint32_t var = 123456789;
+
+var &= ~(1 << 10);
+// 1 << 10 == 0b00000000000000000000010000000000
+// ~(1 << 10) == 0b11111111111111111111101111111111
+// on sait que 1 & 1 == 1 et 0 & 1 == 0 (le et avec 1 conserve la valeur)
+// donc le seul bit qui peut être modifié est le 10e
+// il passe à 0, peu importe sa valeur initiale
+\end{lstlisting}
+
+\subsubsection{Lire un bit}
+Supposons que l'on ait une variable \textit{var} dont on veut lire le 10e bit.
+
+\begin{lstlisting}[frame=single]
+// on veut lire le 10e bit
+uint32_t var = 123456789;
+
+if (var & (1 << 10)) {
+    // do something
+}
+// 1 << 10 == 0b00000000000000000000010000000000
+// on sait que 1 & 1 == 1 et 0 & 1 == 0 (le et avec 1 conserve la valeur)
+// donc le seul bit qui ne sera pas forcément à 0 est le 10e
+// il garde sa valeur initiale
+
+// donc var & (1 << 10) != 0 si et seulement si le 10e bit est à 1.
+\end{lstlisting}
+
+\subsubsection{Aide}
+Pour éviter les problèmes sur les opérations bit-à-bit, des macros sont fournies:
+
+\begin{lstlisting}[frame=single]
+#define SET_BIT(REG, BIT) ((REG) |= (BIT))
+
+#define CLEAR_BIT(REG, BIT) ((REG) &= ~(BIT))
+
+#define READ_BIT(REG, BIT) ((REG) & (BIT))
+\end{lstlisting}
+
+Les noms et les définitions sont assez explicites, il est conseillé de les utiliser pour éviter les erreurs stupides. On fera attention au fait que le deuxième opérande BIT correspond à 1 $<<$ 10 dans nos exemples et pas juste à 10.
+
+\subsection{How to debug: GDB}
+Le GNU Debugger (GDB) est un outil très puissant qui permet de déboguer un programme en mettant des pauses dans l’exécution, en observant l'état de la mémoire (y compris des registres) et en exécutant instruction par instruction un programme.\\
+
+Pour un meilleur débogage il faut compiler avec l'option -g, ce qui rajoute des infos de débug dans le binaire produit.\\
+
+Les commandes principales sont
+\begin{description}
+    \item[b main.c:23] ajoute un breakpoint (une pause) à la ligne 23 du fichier main.c
+    \item[c] reprend l’exécution d'un programme, attention dans le cas d'un microcontroleur on utilisera c pour lancer l’exécution du programme
+    \item[run] lance l’exécution d'un programme (il est possible de donner des arguments à la commande run qui seront transmis au programme), ne pas utiliser sur un microcontroleur
+    \item[mon reset] permet de reset le microcontroleur, ``mon'' indique que la commande est transmise au microcontroleur
+    \item[load] charge le programme en mémoire
+    \item[p var] affiche une variable
+    \item[x var] affiche une variable en hexadécimal et le contenu de la case pointée (pratique pour un pointeur, sinon permet simplement d'avoir la valeur en hexadécimal)
+\end{description}
+
+\bigskip
+Le fichier .gdbinit fourni contient quelques commandes pour vous faciliter la tâche et activer un meilleur affichage.
+
+\begin{description}
+    \item[flash] effectue un ``mon reset'' puis un ``load''
+    \item[split] rajoute l'état des registres et le code assembleur dans la vue
+    \item[ss] rajoute l'état des registres et le code C dans la vue
+    \item[armex] commande pour déboguer en cas d'erreur, ça ne vous servira pas ici
+\end{description}
 
 \section{\label{fichiers_fournis}Les fichiers fournis}
 \section{Le vif du sujet}
