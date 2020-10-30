@@ -517,6 +517,23 @@ Pour éviter les problèmes sur les opérations bit-à-bit, des macros sont four
 Les noms et les définitions sont assez explicites, il est conseillé de les utiliser pour éviter les erreurs stupides. On fera attention au fait que le deuxième opérande BIT correspond à 1 $<<$ 10 dans nos exemples et pas juste à 10.
 
 \subsection{La compilation du C}
+La compilation du C est a priori moins facile que pour la plupart des autres langages: il n'y a pas de d'outil officiel pour compiler automatiquement et on a plusieurs types de fichiers sources et plusieurs types de fichier produits.\\
+
+Cependant la compilation du C n'est pas si compliquée et la comprendre permet d'être beaucoup plus efficace quand on fait de gros projets.\\
+
+La première étape de compilation est le préprocesseur, chaque directive include insert le code du fichier indiqué dans le fichier source, chaque define remplace le code en fonction de la définition. On peut demander à gcc\footnote{GNU C Compiler, le compilateur le plus utilisé pour le langage C} de ne faire que cette étape avec l'option -E.\\
+
+L'étape suivante est la compilation du C vers l'assembleur par le compilateur. Les symboles inconnus (situés dans d'autres fichiers) ne sont pas résolus et on suppose qu'ils seront fournis plus tard. On demande à gcc de faire cette étape avec l'option S.\\
+
+Ensuite, on génère un fichier binaire objet .o depuis le fichier assembleur. On a un fichier objet par fichier source (que ce soit c ou assembleur) On demande à gcc de faire cette étape avec le paramètre -c.\\
+
+Enfin, on ``lie'' tous les fichiers objets entre eux (ainsi que les éventuelles bibliothèques utilisées) pour produire un unique binaire.\\
+
+En général les fichiers intermédiaires (autres que les fichiers sources et les fichiers objets) sont supprimés. Il s'agit d'ailleurs du comportement par défaut de gcc (sans donner de paramètre particulier, gcc produit directement l’exécutable).\\
+
+Cette méthode de compilation permet de ne recompiler un objet que si ses sources sont plus récentes, on évite ainsi pas mal d'opérations, ce principe est au cœur du fonctionnement des Makefile.
+
+\includegraphics[scale=0.7]{assets/compilation.jpg}
 
 \subsection{\label{gdb}How to debug: GDB}
 Le GNU Debugger (GDB) est un outil très puissant qui permet de déboguer un programme en mettant des pauses dans l’exécution, en observant l'état de la mémoire (y compris des registres) et en exécutant instruction par instruction un programme.\\
