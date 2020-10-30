@@ -524,6 +524,100 @@ Le fichier .gdbinit fourni contient quelques commandes pour vous faciliter la t�
 \end{description}
 
 \section{\label{fichiers_fournis}Les fichiers fournis}
+\subsection{Documents}
+Le dossier \textit{docs} contient la documentation nécessaire pour faire le TP, il y a trois documents: la datasheet des stm32f030, le manuel de référence des stm32f030 et le manuel utilisateur des stm32.\\
+
+On vous indiquera dans quel document chercher chaque information à chaque étape.
+
+\subsection{Include}
+Le dossier \textit{include} fournit des header C contenant beaucoup de macros très pratiques pour la programmation sur microcontroleur.\\
+
+En particulier, il y a deux fichiers intéressants:
+\begin{description}
+    \item[stm32f030x8.h] contient les adresses de tous les registres de la doc, ainsi que des macros pour chaque bit de chaque registre et des bitmask. Il fournit également des types et des structures pour une utilisation plus lisible.
+
+\begin{lstlisting}[frame=single]
+// exemple d'utilisation
+#include "stm32f030x8.h"
+
+// GPIOA est une structure fournissant tous les registres du GPIOA
+// GPIOA->BSRR est donc le registre BSRR du GPIOA
+
+// Il y a une macro pour chaque bit et chaque masque
+// Le format est comme ci-dessous, pour un registre lié aux GPIO
+// ce sera GPIO_NOM_BIT (les noms sont les mêmes que dans la doc)
+GPIOA->BSRR |= GPIO_BSRR_BS6;
+\end{lstlisting}
+
+Vous pouvez ouvrir le fichier et chercher dedans pour vérifier le nom des macros.
+
+\item[stm32f0xx.h] contient des macros utiles pour interagir avec les registres (mentionnées dans la \autoref{bit_change} \nameref{bit_change})
+
+\begin{lstlisting}[frame=single]
+#define SET_BIT(REG, BIT) ((REG) |= (BIT))
+#define CLEAR_BIT(REG, BIT) ((REG) &= ~(BIT))
+#define READ_BIT(REG, BIT) ((REG) & (BIT))
+#define CLEAR_REG(REG) ((REG) = (0x0))
+#define WRITE_REG(REG, VAL) ((REG) = (VAL))
+#define READ_REG(REG) ((REG))
+#define MODIFY_REG(REG, CLEARMASK, SETMASK) \
+    WRITE_REG((REG), (((READ_REG(REG)) & (~(CLEARMASK))) | (SETMASK)))
+\end{lstlisting}
+
+Il est conseillé d'utiliser intensivement les 3 premières et d'oublier les autres qui ne sont pas d'un grand intérêt.\\
+
+Ce header importe également les sous headers en fonction du microcontroleur utilisé. Ici, il inclue donc le fichier ``stm32f030x8.h'' (pas besoin d'inclure les deux). Il suffit de définir STM32F030x8 (\textit{\#define STM32F030x8}) pour que cela fonctionne, et la définition est faite à l'échelle du projet dans le Makefile.\\
+
+Ainsi un simple
+\begin{lstlisting}[frame=none]
+#include "stm32f0xx.h"
+\end{lstlisting}
+dans un fichier permet d'utiliser toutes les macros des deux fichiers.
+\end{description}
+
+\subsection{Makefile}
+Le Makefile est le fichier qui permet de compiler le projet de manière automatique et efficace: il contient des règles de construction de chaque fichier ainsi que des dépendances entre fichier, il ne reconstruit pas un fichier s'il est plus récent que sa source.
+
+\subsubsection{Contenu}
+Les premiers symboles définis sont des variables, les plus intéressantes / celles que vous pourriez vouloir modifier (ce n'est pas nécessaire mais vous pouvez expérimenter) sont:
+\begin{description}
+    \item[ASFLAGS] contient les paramètres de compilation des fichiers assembleur
+    \item[CPPFLAGS] contient les paramètres du préprocesseur (on peut fournir des définition de macro à la compilation), on indique par exemple dans quels dossiers chercher les headers
+    \item[CFLAGS] contient les paramètres de compilation des fichiers c, par exemple le flag -Ox indique le niveau d'optimisation (-O0 est stupide, -O3 fait des trucs incroyables)
+    \item[LDFLAGS] contient les paramètres du linker
+    \item[DIRS] est la liste des dossiers contenant des fichiers sources vous pouvez rajouter des dossiers
+    \item[EXE] est le nom de l’exécutable (avec des extensions .elf et .bin selon ce que vous voulez)
+\end{description}
+
+Tout fonctionne de manière automatique: vous pouvez rajouter des fichiers .c ou .s (assembleur) dans n'importe quel dossier de DIRS et ils seront compilés et liés automatiquement.
+
+\subsubsection{Utilisation}
+La commande associée au Makefile est ``make''. Il faut faire ``make + \textit{nom de la règle}'' pour construire la règle voulue, et un simple ``make'' construit la première règle (qui est ici le fichier binaire).\\
+
+\begin{description}
+    \item[make] va construire le binaire
+    \item[make gdb\_server] va lancer le serveur pour la connexion de gdb
+    \item[make gdb] va lancer gdb et le connecter au serveur (donc faire make gdb\_server avant)
+    \item[make tp] va produire le pdf de l'énoncé
+    \item[make clean] va nettoyer les fichiers produits, sauf l’exécutable et le pdf de l'énoncé
+    \item[make clean-all] va nettoyer tous les fichiers produits, y compris l’exécutable et le pdf
+    \item[make re] fait ``make clean-all'' puis ``make''
+\end{description}
+
+\subsection{ld\_ram.lds}
+Ce fichier indique au linker de quelle manière est organisée la mémoire du microcontroleur et de l’exécutable que l'on veut produire.\\
+
+On peut voir les deux zones de mémoire (RAM et flash) avec leurs positions et tailles, ainsi que les différentes parties de l’exécutable et leurs positions en mémoire.
+
+\subsection{lib/crt0.s}
+Il s'agit du programme qui est exécuté initialement, on y définit une fonction \_start qui sera le point d'entrée dans le programme, on écrit dans le registre sp la valeur initiale de la pile, on appelle init\_bss qui initialise le bss (les variables initialisées à 0) et enfin on appelle la fonction main. On peut observer que l'on boucle indéfiniment à la fin.
+
+\subsection{lib/init.c}
+Ce fichier contient la fonction init\_bss qui initialise la bss (là où sont stockées les variables globales / static initialisées à 0) à 0.
+
+\subsection{main.c}
+Il s'agit du fichier principal, il contient la fonction main qui est (de votre point de vue) le point d'entrée du programme.
+
 \section{Le vif du sujet}
 
 

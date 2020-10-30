@@ -17,7 +17,7 @@ ENDIAN = little
 ARCH = -mcpu=cortex-m0 -mthumb
 ASFLAGS = -g
 CPPFLAGS = -Iinclude -D$(DEVICE) -DSTM32F030x8
-CFLAGS = -Wall -Wextra -g -O1 -std=gnu99 $(ARCH) $(INCLUDE)
+CFLAGS = -Wall -Wextra -g -O1 -std=gnu99 $(ARCH)
 LDFLAGS = -T ld_ram.lds -nostdlib
 LDLIBS =
 
