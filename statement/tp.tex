@@ -119,6 +119,8 @@ ou directement sur le dépôt github [\href{https://github.com/TelecomParistoc/b
 \tableofcontents
 \thispagestyle{empty}
 
+\newpage
+
 \section{Introduction}
 L'objectif de cette activité est d'apprendre la programmation \textit{bare-metal}, c'est à dire sur microcontroleur, sans système d'exploitation pour nous faciliter la tâche.\\
 
@@ -132,9 +134,26 @@ De plus, une architecture initiale est fournie pour éviter de passer trop de te
 
 Le premier objectif du TP est d'arriver à allumer une LED située sur le microcontroleur en appuyant sur l'un des boutons.
 
+\subsection{Que lire ?}
+Ce TP est assez long, et il n'est pas \textit{obligatoire} de tout lire (mais je vous invite à le lire en entier tant qu'à faire), ci-dessous une liste d'un minimum à lire (parmi les sections \ref*{theorique}, \ref*{prerequis} et \ref*{fichiers_fournis}):
+\begin{description}
+\item[\nameref{gpio}] pour comprendre le TP
+\item[\nameref{rules_config}] pour connaître les bonnes pratiques de programmation d'un microcontroleur
+\item[\nameref{dependances}] pour pouvoir faire le TP
+\item[\nameref{config}] pour pouvoir faire le TP
+\item[\nameref{rappels_c}] pour arriver à écrire quoi que ce soit
+\item[\nameref{bit_change}] pour configurer les registres
+\item[\nameref{gdb}] pour flasher le programme sur le microcontroleur et le déboguer
+\item[\nameref{documents}] qui décrit les fichiers de documentation fournis
+\item[\nameref{include}] qui décrit les headers fournis, et comment les utiliser
+\item[\nameref{makefile}] pour compiler le projet et lancer les différents programmes
+\end{description}
+
+Si vous faites le choix de ne lire que ces sections il se peut qu'il y ait des choses que vous ne compreniez pas, mais ça ne devrait pas vous empêcher de faire le TP.
+
 \newpage
 
-\section{Quelques points théoriques}
+\section{\label{theorique}Quelques points théoriques}
 \subsection{La mémoire des processus}
 Chaque appareil dispose d'une quantité donnée de différents types de mémoire, en particulier des registres, de la mémoire vive (RAM) et de la mémoire morte (SSD, HDD).\\
 
@@ -159,7 +178,7 @@ Les périphériques sont ``mappés en mémoire'', c'est à dire qu'à chaque pé
 
 Les documentations du périphérique et du microcontroleur indiquent quelles adresses sont à regarder et comment la communication et la configuration s'effectuent.
 
-\subsection{General Purpose Input Output}
+\subsection{\label{gpio}General Purpose Input Output}
 Les General Purpose Input Output ou GPIO sont des moyens de communication génériques situés sur les microcontroleur. Leur avantage est d'être configurable de manière logicielle (et donc dynamique) en tant qu'entrée (un registre permet alors de lire la valeur), sortie (un registre permet alors d'écrire la valeur) ou même des fonctions alternatives spéciales.\\
 
 Dans le cas qui nous intéresse, chaque GPIO dispose de 16 broches pouvant individuellement être programmées. Chaque GPIO possède des adresses virtuelles qui permettent de configurer ses broches de manière très précise. Il est même possible de générer des interruptions depuis des périphériques branchés sur une broche d'un GPIO.\\
@@ -194,12 +213,12 @@ Les registres r4 à r11 sont sauvegardés par la fonction appelée, cela évite 
 
 Le registre r12 n'est sauvegardé ni par la fonction appelée ni par l'appelante, il est donc utilisé de manière temporaire et il faut penser que chaque appel de fonction peut le modifier.
 
-\subsection{Règle générale de configuration d'un microcontroleur}
+\subsection{\label{rules_config}Règle générale de configuration d'un microcontroleur}
 La règle qui suit est presque toujours vraie (il y a donc des cas où on ne l'appliquera pas mais c'est rare): il ne faut modifier que les bits qui nous intéressent dans un registre, et laisser leur valeur aux autres pour éviter de créer des problèmes.\\
 
 Pour voir comment modifier un bit particulier d'un registre, voir \autoref{bit_change} \nameref{bit_change}
 
-\section{Prérequis}
+\section{\label{prerequis}Prérequis}
 \subsection{\label{dependances}Dépendances}
 \begin{itemize}[label=$\bullet$]
     \item make
@@ -228,7 +247,7 @@ Pour voir comment modifier un bit particulier d'un registre, voir \autoref{bit_c
     \item latex (texlive) et pdflatex (pour compiler le sujet)
 \end{itemize}
 
-\subsection{Configuration}
+\subsection{\label{config}Configuration}
 J'ai fait la configuration il y a plusieurs mois donc c'est compliqué de savoir quoi mettre ici.\\
 
 Si vous rencontrez des erreurs ou des comportements étranges, signalez-le.\\
@@ -497,7 +516,9 @@ Pour éviter les problèmes sur les opérations bit-à-bit, des macros sont four
 
 Les noms et les définitions sont assez explicites, il est conseillé de les utiliser pour éviter les erreurs stupides. On fera attention au fait que le deuxième opérande BIT correspond à 1 $<<$ 10 dans nos exemples et pas juste à 10.
 
-\subsection{How to debug: GDB}
+\subsection{La compilation du C}
+
+\subsection{\label{gdb}How to debug: GDB}
 Le GNU Debugger (GDB) est un outil très puissant qui permet de déboguer un programme en mettant des pauses dans l’exécution, en observant l'état de la mémoire (y compris des registres) et en exécutant instruction par instruction un programme.\\
 
 Pour un meilleur débogage il faut compiler avec l'option -g, ce qui rajoute des infos de débug dans le binaire produit.\\
@@ -523,13 +544,15 @@ Le fichier .gdbinit fourni contient quelques commandes pour vous faciliter la t�
     \item[armex] commande pour déboguer en cas d'erreur, ça ne vous servira pas ici
 \end{description}
 
+Pour déboguer sur microcontroleur il faut lancer un serveur GDB qui fera le lien avec le microcontroleur et sur lequel GDB va se connecter ensuite (voir \autoref{makefile} \nameref{makefile} pour savoir comment le lancer).
+
 \section{\label{fichiers_fournis}Les fichiers fournis}
-\subsection{Documents}
+\subsection{\label{documents}Documents}
 Le dossier \textit{docs} contient la documentation nécessaire pour faire le TP, il y a trois documents: la datasheet des stm32f030, le manuel de référence des stm32f030 et le manuel utilisateur des stm32.\\
 
 On vous indiquera dans quel document chercher chaque information à chaque étape.
 
-\subsection{Include}
+\subsection{\label{include}Include}
 Le dossier \textit{include} fournit des header C contenant beaucoup de macros très pratiques pour la programmation sur microcontroleur.\\
 
 En particulier, il y a deux fichiers intéressants:
@@ -575,7 +598,7 @@ Ainsi un simple
 dans un fichier permet d'utiliser toutes les macros des deux fichiers.
 \end{description}
 
-\subsection{Makefile}
+\subsection{\label{makefile}Makefile}
 Le Makefile est le fichier qui permet de compiler le projet de manière automatique et efficace: il contient des règles de construction de chaque fichier ainsi que des dépendances entre fichier, il ne reconstruit pas un fichier s'il est plus récent que sa source.
 
 \subsubsection{Contenu}
@@ -603,6 +626,8 @@ La commande associée au Makefile est ``make''. Il faut faire ``make + \textit{n
     \item[make clean-all] va nettoyer tous les fichiers produits, y compris l’exécutable et le pdf
     \item[make re] fait ``make clean-all'' puis ``make''
 \end{description}
+
+Attention il faut se situer dans le dossier parent du TP (celui contenant le Makefile) pour utiliser toutes ces commandes.
 
 \subsection{ld\_ram.lds}
 Ce fichier indique au linker de quelle manière est organisée la mémoire du microcontroleur et de l’exécutable que l'on veut produire.\\
