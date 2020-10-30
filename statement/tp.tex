@@ -183,7 +183,7 @@ Les General Purpose Input Output ou GPIO sont des moyens de communication géné
 
 Dans le cas qui nous intéresse, chaque GPIO dispose de 16 broches pouvant individuellement être programmées. Chaque GPIO possède des adresses virtuelles qui permettent de configurer ses broches de manière très précise. Il est même possible de générer des interruptions depuis des périphériques branchés sur une broche d'un GPIO.\\
 
-La documentation indique les adresses de chacun des registres ainsi que la manière de les configurer.
+La documentation indique les adresses de chacun des registres ainsi que la manière de les configurer. Les pins des GPIO apparaissent dans la documentation sous la forme PXY où X est la lettre du GPIO et Y le numéro du pin (par exemple PB6 pour le pin 6 du GPIO B).
 
 \subsection{Les registres ARM}
 \textit{Cette partie apporte des détails sur le fonctionnement des processeurs ARM mais n'est pas du tout nécessaire pour la réalisation du TP.}\\
@@ -567,7 +567,13 @@ Pour déboguer sur microcontroleur il faut lancer un serveur GDB qui fera le lie
 \subsection{\label{documents}Documents}
 Le dossier \textit{docs} contient la documentation nécessaire pour faire le TP, il y a trois documents: la datasheet des stm32f030, le manuel de référence des stm32f030 et le manuel utilisateur des stm32.\\
 
-On vous indiquera dans quel document chercher chaque information à chaque étape.
+On vous indiquera dans quel document chercher chaque information à chaque étape.\\
+
+De manière générale le manuel utilisateur contient des informations liées au modèle précis de microcontroleur comme la disposition matérielle.\\
+
+La datasheet fournit également des informations spécifiques au modèle de microcontroleur mais plus techniques: par exemple la disposition des pins ou la liste des fonctions alternatives des GPIO.\\
+
+Enfin le manuel de référence est le document plus complet sur la disposition de la mémoire, la configuration de chaque registre, etc. Il s'agit du principal document que l'on va utiliser.
 
 \subsection{\label{include}Include}
 Le dossier \textit{include} fournit des header C contenant beaucoup de macros très pratiques pour la programmation sur microcontroleur.\\
@@ -652,7 +658,7 @@ Ce fichier indique au linker de quelle manière est organisée la mémoire du mi
 On peut voir les deux zones de mémoire (RAM et flash) avec leurs positions et tailles, ainsi que les différentes parties de l’exécutable et leurs positions en mémoire.
 
 \subsection{lib/crt0.s}
-Il s'agit du programme qui est exécuté initialement, on y définit une fonction \_start qui sera le point d'entrée dans le programme, on écrit dans le registre sp la valeur initiale de la pile, on appelle init\_bss qui initialise le bss (les variables initialisées à 0) et enfin on appelle la fonction main. On peut observer que l'on boucle indéfiniment à la fin.
+Il s'agit du programme qui est exécuté initialement, on y définit une fonction \_start qui sera le point d'entrée dans le programme, on écrit dans le registre sp la valeur initiale de la pile, on appelle init\_bss qui initialise le bss (les variables initialisées à 0) et enfin on appelle la fonction main. On peut observer que l'on boucle indéfiniment après la fonction main.
 
 \subsection{lib/init.c}
 Ce fichier contient la fonction init\_bss qui initialise la bss (là où sont stockées les variables globales / static initialisées à 0) à 0.
@@ -660,7 +666,28 @@ Ce fichier contient la fonction init\_bss qui initialise la bss (là où sont st
 \subsection{main.c}
 Il s'agit du fichier principal, il contient la fonction main qui est (de votre point de vue) le point d'entrée du programme.
 
-\section{Le vif du sujet}
+\newpage
 
+\section{Le vif du sujet}
+L'objectif de ce TP est d'allumer une LED lorsque l'on appuie sur un bouton du microcontroleur.\\
+
+\includegraphics[scale=0.28]{assets/stm32top.png}
+\includegraphics[scale=0.28]{assets/stm32bot.png}
+
+En particulier, on veut allumer LD2 qui est une led verte située au milieu légèrement à droite sur le dessus du microcontroleur (voir schémas) en appuyant sur le bouton B1, qui est le bouton bleu du microcontroleur (le noir est le bouton RESET).\\
+
+\subsection{Allumage de la led}
+On va commencer par essayer d'allumer la LED.\\
+
+La première étape pour cela est d'aller chercher dans le manuel utilisateur à quel broche de quel GPIO est connectée la led.\\
+
+Une fois que vous avez trouvé, on va voir comment configurer ce pin pour l'utiliser comme une sortie.
+
+\subsubsection{Configuration de la broche du GPIO}
+\begin{enumerate}
+\item Pour commencer on doit allumer l'horloge du GPIO, voir la section RCC (reset and clock control) dans le manuel de référence, en particulier RCC\_AHBENR.
+\item Ensuite on doit indiquer que l'on compte utiliser notre pin comme une sortie, voir la section GPIO dans le manuel de référence et en particulier GPIO\_MODER.
+\item
+\end{enumerate}
 
 \end{document}
