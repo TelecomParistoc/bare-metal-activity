@@ -167,7 +167,32 @@ Dans le cas qui nous intéresse, chaque GPIO dispose de 16 broches pouvant indiv
 La documentation indique les adresses de chacun des registres ainsi que la manière de les configurer.
 
 \subsection{Les registres ARM}
-Les processeurs ARM disposent de 16 registres\footnote{en vrai il y en a plus mais pas d'utilité courante},
+\textit{Cette partie apporte des détails sur le fonctionnement des processeurs ARM mais n'est pas du tout nécessaire pour la réalisation du TP.}\\
+
+Les processeurs ARM disposent de 16 registres\footnote{en vrai il y en a plus mais pas d'utilité courante}, ils sont appelés r0, r1, ..., r15.\\
+
+Les registres r0 à r10 sont des registres d'utilité générale, c'est à dire que l'on peut les utiliser comme on veut.\\
+
+Le registre r15 est aussi appelé Program Counter (PC), il pointe sur l'instruction que l'on est en train d’exécuter.\\
+\begin{wrapfigure}{r}{8cm}
+\includegraphics[scale=0.55]{assets/registers.png}
+\end{wrapfigure}
+
+Le registre r14 est le link register (LR), il contient l'adresse de retour lors de l'appel à une fonction.\\
+
+Le registre r13 est le stack pointer (SP), il s'agit d'un pointeur vers l'extrémité de la pile.\\
+
+Le registre r11 est le frame pointer (FP), il s'agit d'un pointeur vers le début de la zone de la pile attribuée à la fonction courante.\\
+
+Ci-contre une comparaison avec les registres sous x86.\\
+
+Lors d'un appel de fonction il faut savoir quels registres doivent être sauvegardés et par qui (fonction appelante ou fonction appelée), il s'agit d'une convention qui a des conséquences.
+
+Dans le cas qui nous intéresse les registres r0 à r3 sont sauvegardées par l'appelant, ces registres vont contenir les paramètres des fonctions (s'il y a plus que 4 paramètres\footnote{ou que certains paramètres font 64 bits} on mettra les autres dans la pile). De plus le registre r0\footnote{r0 + r1 si on renvoie 64 bits} est utilisé pour stocker la valeur de retour.\\
+
+Les registres r4 à r11 sont sauvegardés par la fonction appelée, cela évite de les sauvegarder s'ils ne sont pas utilisés, ils vont typiquement contenir les variables locales.\\
+
+Le registre r12 n'est sauvegardé ni par la fonction appelée ni par l'appelante, il est donc utilisé de manière temporaire et il faut penser que chaque appel de fonction peut le modifier.
 
 \subsection{Règle générale de configuration d'un microcontroleur}
 La règle qui suit est presque toujours vraie (il y a donc des cas où on ne l'appliquera pas mais c'est rare): il ne faut modifier que les bits qui nous intéressent dans un registre, et laisser leur valeur aux autres pour éviter de créer des problèmes.\\
