@@ -707,9 +707,9 @@ Depuis le main appelez led\_init et led\_on et vérifiez que la led s'allume. Ap
 \subsection{Le bouton}
 On va refaire la même chose que dans la section précédente, mais cette fois avec le bouton.\\
 
-Commencez par chercher dans le manuel utilisateur à quelle broche de quel GPIO est connecté le bouton, puis effectuez la configuration de la même manière que précédemment (mais en mettant la broche en entrée cette fois).\\
+Commencez par chercher dans le manuel utilisateur à quelle broche de quel GPIO est connecté le bouton, puis effectuez la configuration de la même manière que précédemment (mais en mettant la broche en entrée cette fois) dans une fonction button\_init.\\
 
-Enfin, cherchez dans le manuel de référence quel registre permet de lire la valeur du pin, et écrire une fonction read\_button qui renvoie la valeur du pin.\\
+Enfin, cherchez dans le manuel de référence quel registre permet de lire la valeur du pin, et écrire une fonction button\_pressed qui renvoie la valeur du pin.\\
 
 On fera attention au fait que le bouton est inversé par rapport à ce à quoi on peut s'attendre: la valeur est 0 lorsque l'on appuie et 1 sinon.
 
