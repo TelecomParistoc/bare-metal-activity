@@ -15,6 +15,9 @@ _start:
     @ copy data from flash to ram
     bl copy_data
 
+    @ init vector table
+    bl irq_init
+
     @ call main
     bl main
 
